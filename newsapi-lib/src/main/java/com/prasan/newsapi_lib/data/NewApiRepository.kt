@@ -9,7 +9,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
-object NewsApiRepository {
+internal object NewsApiRepository {
 
     private val retrofit =
         Retrofit.Builder().run {

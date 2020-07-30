@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 
-class GetNewsSourcesUseCase() :
+internal class GetNewsSourcesUseCase() :
     UseCase<Unit, NewsSourceResponse> {
 
     @ExperimentalCoroutinesApi

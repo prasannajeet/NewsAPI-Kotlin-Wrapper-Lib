@@ -4,7 +4,7 @@ import com.prasan.newsapi_lib.BuildConfig
 import okhttp3.Interceptor
 import okhttp3.Response
 
-class NewsRequestQueryInterceptor() : Interceptor {
+internal class NewsRequestQueryInterceptor() : Interceptor {
 
     private val apiKeyHeader = "x-api-key"
 
