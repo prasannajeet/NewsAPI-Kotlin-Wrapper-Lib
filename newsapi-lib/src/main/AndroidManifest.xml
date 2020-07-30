@@ -1,1 +1,5 @@
-<manifest package="com.prasan.newsapi_lib"></manifest>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.prasan.newsapi_lib">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+</manifest>
