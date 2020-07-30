@@ -1,2 +1,2 @@
 # NewsAPI-Kotlin-Wrapper-Lib
- A wrapper library to let any android application acccess the NewsAPI
+ A wrapper library to let any android application access the NewsAPI
