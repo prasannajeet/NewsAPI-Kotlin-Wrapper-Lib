@@ -1,11 +1,8 @@
 package com.prasan.newsapi_lib
 
 import android.content.Context
-import android.graphics.drawable.Drawable
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.NonNull
-import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -32,7 +29,7 @@ typealias ListItemClickListener<T> = (T) -> Unit
  * @author Prasan
  * @since 1.0
  */
-sealed class NetworkOperationResult<out DTO : Any> {
+internal sealed class NetworkOperationResult<out DTO : Any> {
     data class OnSuccess<out DTO : Any>(val data: DTO) : NetworkOperationResult<DTO>()
     data class OnFailed(val throwable: Throwable) : NetworkOperationResult<Nothing>()
 }
@@ -49,7 +46,7 @@ sealed class NetworkOperationResult<out DTO : Any> {
  * @since 1.0
  */
 @ExperimentalCoroutinesApi
-suspend fun <T : Any> performSafeNetworkApiCall(
+internal suspend fun <T : Any> performSafeNetworkApiCall(
     messageInCaseOfError: String = "Network error",
     allowRetries: Boolean = true,
     numberOfRetries: Int = 2,
@@ -86,30 +83,12 @@ suspend fun <T : Any> performSafeNetworkApiCall(
     }.flowOn(Dispatchers.IO)
 }
 
-
-/**
- * [ImageView] extension function adds the capability to loading image by directly specifying
- * the url
- * @param url Image URL
- */
-fun ImageView.loadUrl(
-    @NonNull url: String,
-    placeholder: Drawable,
-    error: Drawable
-) {
-    Picasso.get()
-        .load(url)
-        .placeholder(placeholder)
-        .error(error)
-        .into(this)
-}
-
 /**
  * Lets the UI act on a controlled bound of states that can be defined here
  * @author Prasan
  * @since 1.0
  */
-sealed class ViewState<out T : Any> {
+internal sealed class ViewState<out T : Any> {
 
     /**
      * Represents UI state where the UI should be showing a loading UX to the user
