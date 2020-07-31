@@ -19,8 +19,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
 
-        buildConfigField ("String", "BASE_URL", "\"" + getLocalValue("BASE_URL") + "\"")
-        buildConfigField ("String", "API_KEY", "\"" + getLocalValue("API_KEY") + "\"")
+        buildConfigField ("String", "BASE_URL", "\"https://newsapi.org/\"")
     }
 
     buildTypes {
@@ -29,12 +28,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-}
-
-def getLocalValue(name) {
-    Properties properties = new Properties()
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-    return properties.getProperty(name)
 }
 
 dependencies {

@@ -9,12 +9,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 
-internal class GetNewsSourcesUseCase() :
+internal class GetNewsSourcesUseCase(override var apiKey: String) :
     UseCase<Unit, NewsSourceResponse> {
 
     @ExperimentalCoroutinesApi
     override suspend fun execute(input: Unit): Flow<ViewState<NewsSourceResponse>> = flow {
-        NewsApiRepository.getNewsSources().collect {
+        NewsApiRepository.getNewsSources(apiKey).collect {
             when (it) {
                 is NetworkOperationResult.OnSuccess -> {
                     it.data.error?.let { errorMsg ->

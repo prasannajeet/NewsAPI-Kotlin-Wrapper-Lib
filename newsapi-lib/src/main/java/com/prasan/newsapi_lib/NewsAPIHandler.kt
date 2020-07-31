@@ -8,20 +8,40 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
 
 object NewsAPIHandler {
+
+    private var apiKey: String? = null
+
+    fun with(apiKey: String): NewsAPIHandler {
+        this.apiKey = apiKey
+        return this
+    }
+
     @ExperimentalCoroutinesApi
     suspend fun getNewsSources(
         onSuccess: (NewsSourceResponse) -> Unit,
         onError: (Throwable) -> Unit
-    ) = GetNewsSourcesUseCase().execute(Unit).collect {
-        when (it) {
-            is ViewState.RenderSuccess ->
-                withContext(Dispatchers.Main) {
-                    onSuccess(it.output)
+    ) {
+
+        if (this.apiKey == null) {
+            withContext(Dispatchers.Main) {
+                onError(Throwable("Please provide an API Key using the NewsAPIHandler#with() method"))
+            }
+            return
+        }
+
+        this.apiKey?.let { str ->
+            GetNewsSourcesUseCase(str).execute(Unit).collect {
+                when (it) {
+                    is ViewState.RenderSuccess ->
+                        withContext(Dispatchers.Main) {
+                            onSuccess(it.output)
+                        }
+                    is ViewState.RenderFailure ->
+                        withContext(Dispatchers.Main) {
+                            onError(it.throwable)
+                        }
                 }
-            is ViewState.RenderFailure ->
-                withContext(Dispatchers.Main) {
-                    onError(it.throwable)
-                }
+            }
         }
     }
 }

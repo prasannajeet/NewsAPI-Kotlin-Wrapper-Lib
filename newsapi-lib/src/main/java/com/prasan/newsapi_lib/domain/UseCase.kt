@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
  */
 internal interface UseCase<in I : Any, out O : Any> {
 
+    var apiKey: String
     /**
      * Execution contract which will run the business logic associated with completing a
      * particular use case

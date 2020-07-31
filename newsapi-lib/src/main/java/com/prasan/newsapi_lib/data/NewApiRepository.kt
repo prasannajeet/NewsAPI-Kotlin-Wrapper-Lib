@@ -12,7 +12,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 
 internal object NewsApiRepository {
 
-    private val retrofit =
+    private fun getRetrofit(apiKey: String) =
         Retrofit.Builder().run {
             baseUrl(BuildConfig.BASE_URL)
             addConverterFactory(MoshiConverterFactory.create())
@@ -20,7 +20,7 @@ internal object NewsApiRepository {
                 addInterceptor(HttpLoggingInterceptor().apply {
                     level = HttpLoggingInterceptor.Level.BODY
                 })
-                addInterceptor(NewsRequestQueryInterceptor())
+                addInterceptor(NewsRequestQueryInterceptor(apiKey))
                 build()
             })
             build()
@@ -29,8 +29,8 @@ internal object NewsApiRepository {
         }
 
     @ExperimentalCoroutinesApi
-    suspend fun getNewsSources() =
+    suspend fun getNewsSources(apiKey: String) =
         performSafeNetworkApiCall {
-            retrofit.getNewsSources()
+            getRetrofit(apiKey).getNewsSources()
         }
 }
