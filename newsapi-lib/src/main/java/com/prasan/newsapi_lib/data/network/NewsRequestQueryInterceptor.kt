@@ -1,4 +1,4 @@
-package com.prasan.newsapi_lib.network
+package com.prasan.newsapi_lib.data.network
 
 import okhttp3.Interceptor
 import okhttp3.Response

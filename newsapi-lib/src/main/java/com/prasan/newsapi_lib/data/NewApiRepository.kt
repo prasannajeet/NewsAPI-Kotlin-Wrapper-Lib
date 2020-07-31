@@ -1,8 +1,8 @@
 package com.prasan.newsapi_lib.data
 
 import com.prasan.newsapi_lib.BuildConfig
-import com.prasan.newsapi_lib.network.NewsAPI
-import com.prasan.newsapi_lib.network.NewsRequestQueryInterceptor
+import com.prasan.newsapi_lib.data.network.NewsAPI
+import com.prasan.newsapi_lib.data.network.NewsRequestQueryInterceptor
 import com.prasan.newsapi_lib.performSafeNetworkApiCall
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okhttp3.OkHttpClient
@@ -20,7 +20,11 @@ internal object NewsApiRepository {
                 addInterceptor(HttpLoggingInterceptor().apply {
                     level = HttpLoggingInterceptor.Level.BODY
                 })
-                addInterceptor(NewsRequestQueryInterceptor(apiKey))
+                addInterceptor(
+                    NewsRequestQueryInterceptor(
+                        apiKey
+                    )
+                )
                 build()
             })
             build()

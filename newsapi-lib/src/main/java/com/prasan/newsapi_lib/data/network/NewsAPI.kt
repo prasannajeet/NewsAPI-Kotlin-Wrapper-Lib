@@ -1,4 +1,4 @@
-package com.prasan.newsapi_lib.network
+package com.prasan.newsapi_lib.data.network
 
 import com.prasan.newsapi_lib.data.dto.NewsSourceResponse
 import retrofit2.Response
