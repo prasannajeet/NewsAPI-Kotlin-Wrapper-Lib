@@ -11,13 +11,13 @@ import retrofit2.Response
 import java.io.IOException
 
 /**
- * Readable naming convention for Network call lambda
+ * Readable naming convention for Retrofit api call lambda
  * @since 1.0
  */
-typealias NetworkAPIInvoke<T> = suspend () -> Response<T>
+typealias RetrofitApiCall<T> = suspend () -> Response<T>
 
 /**
- * typealias for lambda passed when a photo is tapped on in Popular Photos Fragment
+ * typealias for lambda passed when a item is tapped on in a recycler view
  */
 typealias ListItemClickListener<T> = (T) -> Unit
 
@@ -46,7 +46,7 @@ internal suspend fun <T : Any> performSafeNetworkApiCall(
     validateResponseBody: Boolean = true,
     allowRetries: Boolean = true,
     numberOfRetries: Int = 2,
-    networkApiCall: NetworkAPIInvoke<T>
+    networkApiCall: RetrofitApiCall<T>
 ): Flow<State<T>> {
     var delayDuration = 1000L
     val delayFactor = 2
@@ -61,6 +61,7 @@ internal suspend fun <T : Any> performSafeNetworkApiCall(
                 return@flow
             }
             emit(State.Success(response.body()!!))
+            return@flow
         }
         emit(
             State.Failure(
