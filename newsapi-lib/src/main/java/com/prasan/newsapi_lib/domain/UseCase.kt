@@ -1,6 +1,6 @@
 package com.prasan.newsapi_lib.domain
 
-import com.prasan.newsapi_lib.ViewState
+import com.prasan.newsapi_lib.State
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 internal interface UseCase<in I : Any, out O : Any> {
 
     var apiKey: String
+
     /**
      * Execution contract which will run the business logic associated with completing a
      * particular use case
@@ -22,5 +23,5 @@ internal interface UseCase<in I : Any, out O : Any> {
      * @return [O] model type used to define the UseCase class
      */
     @ExperimentalCoroutinesApi
-    suspend fun execute(input: I): Flow<ViewState<O>>
+    suspend fun execute(input: I): Flow<State<O>>
 }

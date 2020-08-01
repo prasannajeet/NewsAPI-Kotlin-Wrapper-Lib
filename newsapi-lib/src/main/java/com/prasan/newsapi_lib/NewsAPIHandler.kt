@@ -32,11 +32,11 @@ object NewsAPIHandler {
         this.apiKey?.let { str ->
             GetNewsSourcesUseCase(str).execute(Unit).collect {
                 when (it) {
-                    is ViewState.RenderSuccess ->
+                    is State.Success ->
                         withContext(Dispatchers.Main) {
                             onSuccess(it.output)
                         }
-                    is ViewState.RenderFailure ->
+                    is State.Failure ->
                         withContext(Dispatchers.Main) {
                             onError(it.throwable)
                         }

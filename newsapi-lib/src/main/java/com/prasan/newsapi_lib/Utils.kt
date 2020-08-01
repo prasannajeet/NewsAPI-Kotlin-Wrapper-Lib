@@ -22,26 +22,13 @@ typealias NetworkAPIInvoke<T> = suspend () -> Response<T>
 typealias ListItemClickListener<T> = (T) -> Unit
 
 /**
- * Sealed class type-restricts the result of API calls to success and failure. The type
- * <T> represents the model class expected from the API call in case of a success
- * In case of success, the result will be wrapped around the OnSuccessResponse class
- * In case of error, the throwable causing the error will be wrapped around OnErrorResponse class
- * @author Prasan
- * @since 1.0
- */
-internal sealed class NetworkOperationResult<out DTO : Any> {
-    data class OnSuccess<out DTO : Any>(val data: DTO) : NetworkOperationResult<DTO>()
-    data class OnFailed(val throwable: Throwable) : NetworkOperationResult<Nothing>()
-}
-
-/**
  * Utility function that works to perform a Retrofit API call and return either a success model
  * instance or an error message wrapped in an [Exception] class
- * @param messageInCaseOfError Custom error message to wrap around [NetworkOperationResult.OnFailed]
+ * @param messageInCaseOfError Custom error message to wrap around [State.Failure]
  * with a default value provided for flexibility
  * @param networkApiCall lambda representing a suspend function for the Retrofit API call
- * @return [NetworkOperationResult.OnSuccess] object of type [T], where [T] is the success object wrapped around
- * [NetworkOperationResult.OnSuccess] if network call is executed successfully, or [NetworkOperationResult.OnFailed]
+ * @return [State.Success] object of type [T], where [T] is the success object wrapped around
+ * [State.Success] if network call is executed successfully, or [State.Failure]
  * object wrapping an [Exception] class stating the error
  * @since 1.0
  */
@@ -51,20 +38,20 @@ internal suspend fun <T : Any> performSafeNetworkApiCall(
     allowRetries: Boolean = true,
     numberOfRetries: Int = 2,
     networkApiCall: NetworkAPIInvoke<T>
-): Flow<NetworkOperationResult<T>> {
+): Flow<State<T>> {
     var delayDuration = 1000L
     val delayFactor = 2
     return flow {
         val response = networkApiCall()
         if (response.isSuccessful) {
             response.body()?.let {
-                emit(NetworkOperationResult.OnSuccess(it))
+                emit(State.Success(it))
             }
-                ?: emit(NetworkOperationResult.OnFailed(IOException("API call successful but empty response body")))
+                ?: emit(State.Failure(IOException("API call successful but empty response body")))
             return@flow
         }
         emit(
-            NetworkOperationResult.OnFailed(
+            State.Failure(
                 IOException(
                     "API call failed with error - ${response.errorBody()
                         ?.string() ?: messageInCaseOfError}"
@@ -73,7 +60,7 @@ internal suspend fun <T : Any> performSafeNetworkApiCall(
         )
         return@flow
     }.catch { e ->
-        emit(NetworkOperationResult.OnFailed(IOException("Exception during network API call: ${e.message}")))
+        emit(State.Failure(IOException("Exception during network API call: ${e.message}")))
         return@catch
     }.retryWhen { cause, attempt ->
         if (!allowRetries || attempt > numberOfRetries || cause !is IOException) return@retryWhen false
@@ -88,20 +75,20 @@ internal suspend fun <T : Any> performSafeNetworkApiCall(
  * @author Prasan
  * @since 1.0
  */
-internal sealed class ViewState<out T : Any> {
+internal sealed class State<out T : Any> {
 
     /**
      * Represents UI state where the UI should be showing a loading UX to the user
      * @param isLoading will be true when the loading UX needs to display, false when not
      */
-    data class Loading(val isLoading: Boolean) : ViewState<Nothing>()
+    data class Loading(val isLoading: Boolean) : State<Nothing>()
 
     /**
      * Represents the UI state where the operation requested by the UI has been completed successfully
      * and the output of type [T] as asked by the UI has been provided to it
      * @param output result object of [T] type representing the fruit of the successful operation
      */
-    data class RenderSuccess<out T : Any>(val output: T) : ViewState<T>()
+    data class Success<out T : Any>(val output: T) : State<T>()
 
     /**
      * Represents the UI state where the operation requested by the UI has failed to complete
@@ -109,7 +96,7 @@ internal sealed class ViewState<out T : Any> {
      * to be shown the user
      * @param throwable [Throwable] instance containing the root cause of the failure in a [String]
      */
-    data class RenderFailure(val throwable: Throwable) : ViewState<Nothing>()
+    data class Failure(val throwable: Throwable) : State<Nothing>()
 }
 
 /**
