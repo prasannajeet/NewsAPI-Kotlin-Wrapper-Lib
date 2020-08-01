@@ -26,6 +26,14 @@ typealias ListItemClickListener<T> = (T) -> Unit
  * instance or an error message wrapped in an [Exception] class
  * @param messageInCaseOfError Custom error message to wrap around [State.Failure]
  * with a default value provided for flexibility
+ * @param validateResponseBody If set to true, function will validate if the response body is empty
+ * of not, in case of empty it will emit a [State.Failure] with a [EmptyBodyException] mentioning the body is empty,
+ * which the collector can map and convert into a success upstream. If set to false, the function
+ * will !! the response body and emit.
+ * @param allowRetries If set to true, it will retry the network call if there is a [IOException] based
+ * on the exponential backoff delay logic
+ * @param numberOfRetries If [allowRetries] is true, this will determine the number of times the call
+ * will be retried before emitting an [State.Failure]
  * @param networkApiCall lambda representing a suspend function for the Retrofit API call
  * @return [State.Success] object of type [T], where [T] is the success object wrapped around
  * [State.Success] if network call is executed successfully, or [State.Failure]
@@ -35,6 +43,7 @@ typealias ListItemClickListener<T> = (T) -> Unit
 @ExperimentalCoroutinesApi
 internal suspend fun <T : Any> performSafeNetworkApiCall(
     messageInCaseOfError: String = "Network error",
+    validateResponseBody: Boolean = true,
     allowRetries: Boolean = true,
     numberOfRetries: Int = 2,
     networkApiCall: NetworkAPIInvoke<T>
@@ -44,11 +53,14 @@ internal suspend fun <T : Any> performSafeNetworkApiCall(
     return flow {
         val response = networkApiCall()
         if (response.isSuccessful) {
-            response.body()?.let {
-                emit(State.Success(it))
+            if (validateResponseBody) {
+                response.body()?.let {
+                    emit(State.Success(it))
+                }
+                    ?: emit(State.Failure(EmptyBodyException()))
+                return@flow
             }
-                ?: emit(State.Failure(IOException("API call successful but empty response body")))
-            return@flow
+            emit(State.Success(response.body()!!))
         }
         emit(
             State.Failure(
@@ -104,4 +116,15 @@ internal sealed class State<out T : Any> {
  */
 fun Context.showToast(@NonNull message: String) {
     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+}
+
+/**
+ * Custom [Exception] class which denotes a empty body obtained during [performSafeNetworkApiCall]
+ * operation
+ * @author Prasan
+ * @since 1.0
+ */
+internal class EmptyBodyException : Exception() {
+    override val message: String?
+        get() = "API call successful, but response body is empty"
 }
